@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <title>Product Return Management System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #111827;
+      --muted: #6b7280;
+      --card: #f3f4f6;
+      --border: #e5e7eb;
+      --primary: #2563eb;
+      --primary-contrast: #ffffff;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --warning: #ca8a04;
+      --input-bg: #ffffff;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    html[data-theme="dark"] {
+      --bg: #0b1220;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --card: #111827;
+      --border: #1f2937;
+      --primary: #60a5fa;
+      --primary-contrast: #0b1220;
+      --success: #22c55e;
+      --danger: #f87171;
+      --warning: #facc15;
+      --input-bg: #0f172a;
+      --shadow: 0 1px 3px rgba(0,0,0,0.4);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background 0.25s ease, color 0.25s ease;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--card);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: var(--shadow);
+    }
+
+    header h1 {
+      font-size: 1.1rem;
+      margin: 0;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button, .btn {
+      background: var(--primary);
+      color: var(--primary-contrast);
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: filter 0.15s ease, transform 0.05s ease;
+    }
+    button:hover { filter: brightness(1.07); }
+    button:active { transform: translateY(1px); }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: #fff;
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: #111;
+    }
+
+    main {
+      padding: 16px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      margin: 0 0 10px 0;
+      font-size: 1.05rem;
+    }
+
+    label {
+      display: block;
+      margin: 8px 0 4px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    @media (min-width: 700px) {
+      .row-2 { grid-template-columns: 1fr 1fr; }
+      .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+    }
+
+    .item-row {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      background: var(--bg);
+    }
+
+    .item-row .row {
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 700px) {
+      .item-row .row {
+        grid-template-columns: 1.2fr 0.6fr 1.2fr auto;
+        align-items: end;
+      }
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    .error {
+      color: var(--danger);
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+
+    .success {
+      color: var(--success);
+      font-size: 0.9rem;
+      margin-top: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      border: 1px solid var(--border);
+      padding: 6px 8px;
+      text-align: left;
+    }
+    th {
+      background: rgba(127,127,127,0.06);
+      font-weight: 600;
+    }
+
+    .filters {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    @media (min-width: 700px) {
+      .filters {
+        grid-template-columns: 1.2fr 0.8fr 0.8fr auto;
+        align-items: end;
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--muted);
+    }
+
+    .tag.requested { background: rgba(37,99,235,0.08); color: var(--primary); border-color: rgba(37,99,235,0.25); }
+    .tag.approved { background: rgba(22,163,74,0.08); color: var(--success); border-color: rgba(22,163,74,0.25); }
+    .tag.received { background: rgba(202,138,4,0.08); color: var(--warning); border-color: rgba(202,138,4,0.25); }
+    .tag.refunded { background: rgba(37,99,235,0.08); color: var(--primary); border-color: rgba(37,99,235,0.25); }
+    .tag.rejected { background: rgba(220,38,38,0.08); color: var(--danger); border-color: rgba(220,38,38,0.25); }
+
+    .small {
+      font-size: 0.8rem;
+    }
+
+    .spacer {
+      height: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Product Return Management</h1>
+    <div class="header-actions">
+      <button id="themeToggle" class="btn-secondary" title="Toggle theme">
+        🌓 Theme
+      </button>
+      <span id="userDisplay" class="muted small"></span>
+      <button id="logoutBtn" class="btn-secondary hidden">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- LOGIN CARD -->
+    <section id="loginCard" class="card">
+      <h2>Login</h2>
+      <div class="row row-2">
+        <div>
+          <label for="loginEmail">Email</label>
+          <input id="loginEmail" type="email" placeholder="you@example.com" />
+        </div>
+        <div>
+          <label for="loginPassword">Password</label>
+          <input id="loginPassword" type="password" placeholder="••••••••" />
+        </div>
+      </div>
+      <div class="row row-2" style="margin-top:10px;">
+        <div>
+          <label for="loginRole">Role</label>
+          <select id="loginRole">
+            <option value="customer">Customer</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <div style="display:flex; align-items:end;">
+          <button id="loginBtn" style="width:100%;">Login</button>
+        </div>
+      </div>
+      <div id="loginError" class="error"></div>
+      <div class="spacer"></div>
+      <p class="muted small">
+        Demo: any email/password works. Role determines what you can see.
+      </p>
+    </section>
+
+    <!-- DASHBOARD (hidden until login) -->
+    <section id="dashboardCard" class="card hidden">
+      <h2>Dashboard</h2>
+      <p class="muted small">
+        Create return requests as a customer. Approve/reject/manage them as an admin.
+      </p>
+
+      <!-- CUSTOMER: CREATE RETURN -->
+      <div id="customerSection" class="hidden">
+        <h3 style="margin:14px 0 8px;">Create Return Request</h3>
+        <div class="row row-2">
+          <div>
+            <label for="orderId">Order ID</label>
+            <input id="orderId" type="text" placeholder="e.g. ORD-12345" />
+          </div>
+          <div>
+            <label for="customerName">Your Name</label>
+            <input id="customerName" type="text" placeholder="Full name" />
+          </div>
+        </div>
+        <div class="row row-2" style="margin-top:8px;">
+          <div>
+            <label for="customerEmail">Your Email</label>
+            <input id="customerEmail" type="email" placeholder="you@example.com" />
+          </div>
+          <div>
+            <label for="customerPhone">Phone (optional)</label>
+            <input id="customerPhone" type="text" placeholder="+1 234 567 890" />
+          </div>
+        </div>
+
+        <h4 style="margin:14px 0 6px;">Items</h4>
+        <div id="itemsContainer"></div>
+        <div class="actions" style="margin-bottom:10px;">
+          <button id="addItemBtn" class="btn-secondary">+ Add Item</button>
+        </div>
+
+        <div class="actions">
+          <button id="submitReturnBtn">Submit Return Request</button>
+          <span id="formMessage" class="muted"></span>
+        </div>
+        <div id="formError" class="error"></div>
+      </div>
+
+      <!-- ADMIN: MANAGE RETURNS -->
+      <div id="adminSection" class="hidden">
+        <h3 style="margin:14px 0 8px;">Manage Returns</h3>
+
+        <div class="filters">
+          <div>
+            <label for="searchInput">Search (Order ID / Name / Email)</label>
+            <input id="searchInput" type="text" placeholder="Type to filter..." />
+          </div>
+          <div>
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter">
+              <option value="">All</option>
+              <option value="requested">Requested</option>
+              <option value="approved">Approved</option>
+              <option value="received">Received</option>
+              <option value="refunded">Refunded</option>
+              <option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div>
+            <label for="sortBy">Sort by</label>
+            <select id="sortBy">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="order">Order ID</option>
+            </select>
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button id="refreshBtn" class="btn-secondary" style="width:100%;">Refresh</button>
+          </div>
+        </div>
+
+        <div style="overflow-x:auto;">
+          <table id="returnsTable">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Items</th>
+                <th>Status</th>
+                <th>Refund</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="muted small" style="margin-top:6px;">
+          Tip: Use the actions to update status. Refund amount is optional.
+        </p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    // ---------- THEME TOGGLE ----------
+    (function initTheme() {
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark' || saved === 'light') {
+        document.documentElement.setAttribute('data-theme', saved);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
+    })();
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+
+    // ---------- AUTH (SIMULATED) ----------
+    const loginCard = document.getElementById('loginCard');
+    const dashboardCard = document.getElementById('dashboardCard');
+    const userDisplay = document.getElementById('userDisplay');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const loginBtn = document.getElementById('loginBtn');
+    const loginError = document.getElementById('loginError');
+
+    const customerSection = document.getElementById('customerSection');
+    const adminSection = document.getElementById('adminSection');
+
+    let currentUser = null;
+
+    function loadSession() {
+      const session = localStorage.getItem('returnSystemUser');
+      if (session) {
+        try {
+          currentUser = JSON.parse(session);
+        } catch {
+          currentUser = null;
+        }
+      }
+      if (currentUser) {
+        showDashboard();
+      } else {
+        showLogin();
+      }
+    }
+
+    function showLogin() {
+      loginCard.classList.remove('hidden');
+      dashboardCard.classList.add('hidden');
+      userDisplay.textContent = '';
+      logoutBtn.classList.add('hidden');
+    }
+
+    function showDashboard() {
+      loginCard.classList.add('hidden');
+      dashboardCard.classList.remove('hidden');
+      userDisplay.textContent = `${currentUser.email} (${currentUser.role})`;
+      logoutBtn.classList.remove('hidden');
+
+      if (currentUser.role === 'customer') {
+        customerSection.classList.remove('hidden');
+        adminSection.classList.add('hidden');
+      } else if (currentUser.role === 'admin') {
+        customerSection.classList.add('hidden');
+        adminSection.classList.remove('hidden');
+        loadReturnsTable();
+      } else {
+        // Unknown role: show nothing
+        customerSection.classList.add('hidden');
+        adminSection.classList.add('hidden');
+      }
+    }
+
+    loginBtn.addEventListener('click', () => {
+      loginError.textContent = '';
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const role = document.getElementById('loginRole').value;
+
+      if (!email || !password) {
+        loginError.textContent = 'Please enter email and password.';
+        return;
+      }
+
+      // Simulated login: accept any credentials
+      currentUser = { email, role };
+      localStorage.setItem('returnSystemUser', JSON.stringify(currentUser));
+      showDashboard();
+    });
+
+    logoutBtn.addEventListener('click', () => {
+      currentUser = null;
+      localStorage.removeItem('returnSystemUser');
+      showLogin();
+    });
+
+    loadSession();
+
+    // ---------- RETURNS DATA (LOCALSTORAGE) ----------
+    function getReturns() {
+      const raw = localStorage.getItem('returnRequests');
+      if (!raw) return [];
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return [];
+      }
+    }
+
+    function saveReturns(list) {
+      localStorage.setItem('returnRequests', JSON.stringify(list));
+    }
+
+    function generateId() {
+      return 'RMA-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+    }
+
+    // ---------- CUSTOMER: CREATE RETURN ----------
+    const itemsContainer = document.getElementById('itemsContainer');
+    const addItemBtn = document.getElementById('addItemBtn');
+    const submitReturnBtn = document.getElementById('submitReturnBtn');
+    const formMessage = document.getElementById('formMessage');
+    const formError = document.getElementById('formError');
+
+    let itemIndex = 0;
+
+    function createItemRow() {
+      const div = document.createElement('div');
+      div.className = 'item-row';
+      div.innerHTML = `
+        <div class="row">
+          <div>
+            <label>Product Name</label>
+            <input type="text" name="productName_${itemIndex}" placeholder="e.g. Wireless Mouse" />
+          </div>
+          <div>
+            <label>Quantity</label>
+            <input type="number" name="quantity_${itemIndex}" min="1" value="1" />
+          </div>
+          <div>
+            <label>Reason</label>
+            <input type="text" name="reason_${itemIndex}" placeholder="Defective, wrong size, etc." />
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button type="button" class="btn-secondary removeItemBtn">Remove</button>
+          </div>
+        </div>
+      `;
+      itemsContainer.appendChild(div);
+      itemIndex++;
+    }
+
+    addItemBtn.addEventListener('click', createItemRow);
+    itemsContainer.addEventListener('click', e => {
+      if (e.target.classList.contains('removeItemBtn')) {
+        e.target.closest('.item-row').remove();
+      }
+    });
+
+    // Start with one item row
+    createItemRow();
+
+    submitReturnBtn.addEventListener('click', () => {
+      formError.textContent = '';
+      formMessage.textContent = '';
+
+      const orderId = document.getElementById('orderId').value.trim();
+      const customerName = document.getElementById('customerName').value.trim();
+      const customerEmail = document.getElementById('customerEmail').value.trim();
+      const customerPhone = document.getElementById('customerPhone').value.trim();
+
+      if (!orderId || !customerName || !customerEmail) {
+        formError.textContent = 'Please fill Order ID, Name, and Email.';
+        return;
+      }
+
+      const itemRows = itemsContainer.querySelectorAll('.item-row');
+      const items = [];
+
+      itemRows.forEach(row => {
+        const productName = row.querySelector('[name^="productName_"]').value.trim();
+        const quantity = Number(row.querySelector('[name^="quantity_"]').value);
+        const reason = row.querySelector('[name^="reason_"]').value.trim();
+
+        if (productName && quantity > 0 && reason) {
+          items.push({ productName, quantity, reason });
+        }
+      });
+
+      if (!items.length) {
+        formError.textContent = 'Please add at least one valid item.';
+        return;
+      }
+
+      const returns = getReturns();
+      const newReturn = {
+        id: generateId(),
+        orderId,
+        customerName,
+        customerEmail,
+        customerPhone: customerPhone || '',
+        items,
+        status: 'requested',
+        refundAmount: 0,
+        notes: '',
+        createdAt: new Date().toISOString()
+      };
+
+      returns.unshift(newReturn);
+      saveReturns(returns);
+
+      formMessage.textContent = 'Return request created successfully!';
+      // Reset form
+      document.getElementById('orderId').value = '';
+      document.getElementById('customerName').value = '';
+      document.getElementById('customerEmail').value = '';
+      document.getElementById('customerPhone').value = '';
+      itemsContainer.innerHTML = '';
+      itemIndex = 0;
+      createItemRow();
+
+      // If admin is logged in, refresh table
+      if (currentUser && currentUser.role === 'admin') {
+        loadReturnsTable();
+      }
+    });
+
+    // ---------- ADMIN: MANAGE RETURNS ----------
+    const returnsTableBody = document.querySelector('#returnsTable tbody');
+    const searchInput = document.getElementById('searchInput');
+    const statusFilter = document.getElementById('statusFilter');
+    const sortBy = document.getElementById('sortBy');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    function loadReturnsTable() {
+      const returns = getReturns();
+
+      const search = searchInput.value.trim().toLowerCase();
+      const status = statusFilter.value;
+
+      let filtered = returns.filter(r => {
+        const text =
+          (r.orderId || '') + ' ' +
+          (r.customerName || '') + ' ' +
+          (r.customerEmail || '');
+        const matchSearch = !search || text.toLowerCase().includes(search);
+        const matchStatus = !status || r.status === status;
+        return matchSearch && matchStatus;
+      });
+
+      const sortMode = sortBy.value;
+      if (sortMode === 'newest') {
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } else if (sortMode === 'oldest') {
+        filtered.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+      } else if (sortMode === 'order') {
+        filtered.sort((a, b) => (a.orderId || '').localeCompare(b.orderId || ''));
+      }
+
+      returnsTableBody.innerHTML = '';
+
+      filtered.forEach(r => {
+        const tr = document.createElement('tr');
+
+        const itemsSummary = r.items
+          .map(i => `${i.productName} x${i.quantity}`)
+          .join(', ');
+
+        const statusClass = r.status || 'requested';
+
+        tr.innerHTML = `
+          <td class="small">${r.id}</td>
+          <td>${r.orderId || ''}</td>
+          <td>
+            <div>${r.customerName || ''}</div>
+            <div class="muted small">${r.customerEmail || ''}</div>
+            ${r.customerPhone ? `<div class="muted small">${r.customerPhone}</div>` : ''}
+          </td>
+          <td>${itemsSummary}</td>
+          <td><span class="tag ${statusClass}">${r.status || 'requested'}</span></td>
+          <td>${r.refundAmount || 0}</td>
+          <td>
+            <button class="btn-secondary approveBtn" data-id="${r.id}">Approve</button>
+            <button class="btn-secondary rejectBtn" data-id="${r.id}">Reject</button>
+            <button class="btn-secondary receivedBtn" data-id="${r.id}">Mark Received</button>
+            <button class="btn-success refundedBtn" data-id="${r.id}">Mark Refunded</button>
+            <br/>
+            <input type="number" class="refundInput small" data-id="${r.id}" placeholder="Refund amount" value="${r.refundAmount || 0}" style="width:110px; margin-top:4px;" />
+            <button class="btn-secondary setRefundBtn" data-id="${r.id}" style="margin-top:4px;">Set Refund</button>
+          </td>
+        `;
+        returnsTableBody.appendChild(tr);
+      });
+    }
+
+    returnsTableBody.addEventListener('click', e => {
+      const btn = e.target;
+      if (btn.tagName !== 'BUTTON') return;
+
+      const id = btn.dataset.id;
+      if (!id) return;
+
+      const returns = getReturns();
+      const idx = returns.findIndex(r => r.id === id);
+      if (idx === -1) return;
+
+      const r = returns[idx];
+
+      if (btn.classList.contains('approveBtn')) {
+        r.status = 'approved';
+      } else if (btn.classList.contains('rejectBtn')) {
+        r.status = 'rejected';
+      } else if (btn.classList.contains('receivedBtn')) {
+        r.status = 'received';
+      } else if (btn.classList.contains('refundedBtn')) {
+        r.status = 'refunded';
+      } else if (btn.classList.contains('setRefundBtn')) {
+        const input = returnsTableBody.querySelector(`.refundInput[data-id="${id}"]`);
+        const val = Number(input.value);
+        if (!Number.isFinite(val) || val < 0) {
+          alert('Please enter a valid refund amount.');
+          return;
+        }
+        r.refundAmount = val;
+      } else {
+        return;
+      }
+
+      returns[idx] = r;
+      saveReturns(returns);
+      loadReturnsTable();
+    });
+
+    searchInput.addEventListener('input', loadReturnsTable);
+    statusFilter.addEventListener('change', loadReturnsTable);
+    sortBy.addEventListener('change', loadReturnsTable);
+    refreshBtn.addEventListener('click', loadReturnsTable);
+  </script>
+</body>
+</html>        
